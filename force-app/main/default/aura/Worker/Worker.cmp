@@ -1,0 +1,38 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes">
+	<aura:handler name="init" value="{!this}" action="{!c.init}" 
+		description="Initialistaion handler" />
+	<aura:attribute name="count" type="Integer" description="count" default="0"/>
+	<aura:attribute name="count2" type="Integer" description="count" default="0"/>
+	<iframe aura:id="worker" class="hidden-frame" src="{!v.vfHost+'/apex/Pool'}" />
+	<lightning:card title="Worker Test">
+		<lightning:layout >
+			<lightning:layoutItem padding="around-small">
+				<div class="header-column">
+					{!v.vfHost}
+				</div>
+			</lightning:layoutItem>
+			<lightning:layoutItem padding="around-small">
+				<div class="header-column">
+				</div>
+			</lightning:layoutItem>
+			<lightning:layoutItem padding="around-small">
+				<div class="header-column">
+					<p class="field-title" title="Field 3">Count</p>
+					<p>{!v.count}</p>
+				</div>
+			</lightning:layoutItem>
+			<lightning:layoutItem padding="around-small">
+				<div class="header-column">
+					<p class="field-title" title="Field 3">Count</p>
+					<p>{!v.count2}</p>
+				</div>
+			</lightning:layoutItem>
+			<lightning:layoutItem padding="around-small">
+				<lightning:button label="Start" title="Worker action" onclick="{!c.startWorker}"/>
+			</lightning:layoutItem>
+			<lightning:layoutItem padding="around-small">
+				<lightning:button label="Stop" title="Worker action" onclick="{!c.endWorker}"/>
+			</lightning:layoutItem>
+		</lightning:layout>
+	</lightning:card>
+</aura:component>	

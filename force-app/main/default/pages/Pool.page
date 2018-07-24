@@ -1,0 +1,74 @@
+<apex:page>
+<head>
+	<!-- Workers currently inline scripts, still need to see if URLFOR in the worker constructor
+			will work with static resources -->
+	<script id="testWorker" type="javascript/worker">
+		var i = 0;
+		function timedCount() {
+			i = i + 1;
+			postMessage(i);
+			setTimeout('timedCount()', 1000);
+		}
+		timedCount();
+	</script>
+	<script id="testWorker2" type="javascript/worker">
+		var j = 0;
+		function timedCount2() {
+			j = j + 1;
+			postMessage(j);
+			setTimeout('timedCount2()', 2000);
+		}
+		timedCount2();
+	</script>
+</head>
+<script>
+	var w = undefined;
+	var w2 = undefined;
+	/**
+	 * This is like in the lightning component the host of the recipient in this case the lightning
+	 * provider. Again this is hardcoded for now as I see no real easy way of dynamically creating
+	 * this uri atm.
+	 */
+	var lexOrigin = 'https://force-enterprise-5999-dev-ed.lightning.force.com';
+	window.addEventListener('message', function(event) {
+		if(event.origin !== lexOrigin) {
+			return;
+		}
+		if(typeof(Worker) != undefined) {
+			if(JSON.parse(event.data).method == 'startWorker') {
+				var blob = new Blob([document.querySelector('#testWorker').textContent], {type:'text/javascript'});
+				w = new Worker(window.URL.createObjectURL(blob));
+				w.onmessage = function(event) {
+					sendToLC({
+						attribute: 'count',
+						value: event.data
+					});
+				};
+				var blob2 = new Blob([document.querySelector('#testWorker2').textContent], {type:'text/javascript'});
+				w2 = new Worker(window.URL.createObjectURL(blob2));
+				w2.onmessage = function(event) {
+					sendToLC({
+						attribute: 'count2',
+						value: event.data
+					});
+				};
+			}
+			if(JSON.parse(event.data).method == 'endWorker') {
+				w.terminate();
+				w = undefined;
+				w2.terminate();
+				w2 = undefined;
+			}
+		}
+	}, false);
+
+	/**
+	 * @description The most primitive of post methods
+	 * @param {Object} val - Contents of message to post
+	 * @return {void}
+	 */
+	function sendToLC(val) {
+		parent.postMessage(val, lexOrigin);
+	}	
+</script>
+</apex:page>
